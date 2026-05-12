@@ -100,9 +100,9 @@ class _MentorDetailPanelState extends State<MentorDetailPanel> {
             price: _mentor!.price,
             duration: _mentor!.duration,
             sessionType: _mentor!.sessionType,
-            bio: expert.bio ?? _mentor!.bio,
+            bio: expert.name,
             profileImageUrl:
-                expert.profileImageUrl ?? _mentor!.profileImageUrl,
+                expert.imageFile,
           );
         });
       }

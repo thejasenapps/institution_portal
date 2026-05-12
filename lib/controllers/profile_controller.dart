@@ -90,16 +90,24 @@ class ProfileController extends GetxController {
       await _firebaseService.updateInstitutionName(
           institutionId, newName.trim());
 
-      // Update the in-memory model to reflect the saved name
+      // Update the in-memory model to reflect the saved name.
+      // All fields are preserved so computed getters remain correct.
       if (institution.value != null) {
+        final prev = institution.value!;
         institution.value = InstitutionModel(
-          id: institution.value!.id,
-          email: institution.value!.email,
+          id: prev.id,
+          email: prev.email,
+          domainUrl: prev.domainUrl,
           name: newName.trim(),
-          logoUrl: institution.value!.logoUrl,
-          subscriptionExpiry: institution.value!.subscriptionExpiry,
-          plan: institution.value!.plan,
-          subscriptionHistory: institution.value!.subscriptionHistory,
+          logo: prev.logo,
+          subscriptionStatus: prev.subscriptionStatus,
+          subscriptionStartDate: prev.subscriptionStartDate,
+          subscriptionEndDate: prev.subscriptionEndDate,
+          subscriptionAmount: prev.subscriptionAmount,
+          subscriptionHistory: prev.subscriptionHistory,
+          trialLimit: prev.trialLimit,
+          origin: prev.origin,
+          registeredAt: prev.registeredAt,
         );
       }
 
@@ -187,16 +195,24 @@ class ProfileController extends GetxController {
       // Write the URL to Firestore
       await _firebaseService.updateInstitutionLogoUrl(institutionId, logoUrl);
 
-      // Update the in-memory model immediately
+      // Update the in-memory model immediately.
+      // All fields are preserved so computed getters remain correct.
       if (institution.value != null) {
+        final prev = institution.value!;
         institution.value = InstitutionModel(
-          id: institution.value!.id,
-          email: institution.value!.email,
-          name: institution.value!.name,
-          logoUrl: logoUrl,
-          subscriptionExpiry: institution.value!.subscriptionExpiry,
-          plan: institution.value!.plan,
-          subscriptionHistory: institution.value!.subscriptionHistory,
+          id: prev.id,
+          email: prev.email,
+          domainUrl: prev.domainUrl,
+          name: prev.name,
+          logo: logoUrl,
+          subscriptionStatus: prev.subscriptionStatus,
+          subscriptionStartDate: prev.subscriptionStartDate,
+          subscriptionEndDate: prev.subscriptionEndDate,
+          subscriptionAmount: prev.subscriptionAmount,
+          subscriptionHistory: prev.subscriptionHistory,
+          trialLimit: prev.trialLimit,
+          origin: prev.origin,
+          registeredAt: prev.registeredAt,
         );
       }
 

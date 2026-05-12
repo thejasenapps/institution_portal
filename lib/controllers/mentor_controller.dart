@@ -145,7 +145,7 @@ class MentorController extends GetxController {
     final bool hasSession = topic.sessionId.isNotEmpty;
 
     // Run expert and session reads in parallel.
-    final expertFuture = _firebaseService.getExpert(topic.expertId);
+    final expertFuture = _firebaseService.getExpert(topic.expertId ?? '');
     final sessionFuture =
         hasSession ? _firebaseService.getSession(topic.sessionId) : null;
 
@@ -181,17 +181,17 @@ class MentorController extends GetxController {
 
     // Build the row with session data or "Unknown" placeholders.
     return MentorRowModel(
-      expertId: topic.expertId,
+      expertId: topic.expertId ?? '',
       mentorName: expert.name,
       topicName: topic.name,
       topicId: topic.topicId,
-      institutionId: topic.institutionId,
+      institutionId: topic.institutionId ?? '',
       sessionId: topic.sessionId,
-      price: session?.price ?? SessionPlaceholders.unknown,
-      duration: session?.duration ?? SessionPlaceholders.unknown,
+      price: topic.topicRate.toString(),
+      duration: session!.selectedHours.toString(),
       sessionType: session?.sessionType ?? SessionPlaceholders.unknown,
-      bio: expert.bio,
-      profileImageUrl: expert.profileImageUrl,
+      bio: expert.name,
+      profileImageUrl: expert.imageFile,
     );
   }
 }

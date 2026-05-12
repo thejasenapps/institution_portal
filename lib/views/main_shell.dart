@@ -106,12 +106,12 @@ class MainShell extends StatelessWidget {
           body: Row(
             children: [
               if (!isMobile)
-                Sidebar(
+                Obx(() => Sidebar(
                   collapsed: isTablet,
                   activeIndex: nav.activeIndex.value,
                   onItemTap: nav.navigateTo,
                   onLogoutTap: Get.find<AuthController>().logout,
-                ),
+                )),
               Expanded(
                 child: Obx(() => _contentView(nav.activeIndex.value)),
               ),

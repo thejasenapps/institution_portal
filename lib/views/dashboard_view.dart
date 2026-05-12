@@ -200,7 +200,10 @@ class _StatCardGrid extends StatelessWidget {
     return Obx(() {
       final mentorCount = mentorController.mentorList.length;
       final institution = profileController.institution.value;
-      final expiryText = formatSubscriptionDate(institution?.subscriptionExpiry);
+      // Derived from startDate/endDate on the most recent subscription entry.
+      final expiryText = formatSubscriptionDate(
+        institution?.currentSubscriptionEndDate,
+      );
 
       final cards = <Widget>[
         StatCard(

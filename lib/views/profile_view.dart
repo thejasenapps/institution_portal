@@ -161,7 +161,7 @@ class _ProfileViewState extends State<ProfileView> {
   Widget _buildEditableSection(BuildContext context) {
     return Obx(() {
       final inst = _controller.institution.value;
-      final logoUrl = inst?.logoUrl;
+      final logoUrl = inst?.logo;
       final currentName = inst?.name ?? '';
 
       // Seed the text field when not editing (reflects external updates).
@@ -313,8 +313,11 @@ class _ProfileViewState extends State<ProfileView> {
   Widget _buildReadOnlySection(BuildContext context) {
     return Obx(() {
       final inst = _controller.institution.value;
-      final expiryText = formatSubscriptionDate(inst?.subscriptionExpiry);
-      final plan = inst?.plan ?? '—';
+      // Expiry derived from startDate/endDate (most recent history entry or
+      // subscriptionEndDate field). Returns '—' when not available.
+      final expiryText = formatSubscriptionDate(inst?.currentSubscriptionEndDate);
+      // Plan derived from subscriptionAmount; returns '—' when absent.
+      final plan = inst?.subscriptionPlan ?? '—';
 
       return Column(
         crossAxisAlignment: CrossAxisAlignment.start,

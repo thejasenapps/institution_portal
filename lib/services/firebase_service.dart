@@ -134,7 +134,7 @@ class FirebaseService {
           .timeout(_timeout);
 
       if (!doc.exists) return null;
-      return ExpertModel.fromFirestore(doc);
+      return ExpertModel.fromFirestore(doc.data() as Map<String, dynamic>);
     } catch (e) {
       throw FirebaseServiceException(
         'Failed to get expert.',

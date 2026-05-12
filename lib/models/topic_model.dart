@@ -1,95 +1,142 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 
-/// Represents a topic document from the Firestore `topics` collection.
+/// Firestore model for topics collection
 class TopicModel {
-  /// The topic's unique Firestore document ID.
-  final String topicId;
-
-  /// The display name of the topic.
+  final String? expertId;
   final String name;
-
-  /// The ID of the expert associated with this topic.
-  final String expertId;
-
-  /// The ID of the session linked to this topic.
-  ///
-  /// May be empty when no session has been assigned yet.
+  final String topicId;
+  final String? expertName;
+  final String description;
+  final int topicRate;
   final String sessionId;
-
-  /// The ID of the institution that owns this topic.
-  final String institutionId;
-
-  /// Optional skill type classification for the topic.
-  final String? skillType;
-
-  /// Optional status of the topic (e.g. "active", "inactive").
+  final String session;
+  final String sessionType;
+  final List<String>? expertise;
+  final double? rating;
+  final String? location;
+  final int? count;
   final String? status;
-
-  /// Optional URL for the topic's cover image.
+  final String? skillType;
   final String? imageUrl;
-
-  /// Optional session type descriptor (e.g. "one-on-one", "group").
-  final String? sessionType;
-
-  /// Optional description of the topic.
-  final String? description;
+  final dynamic audio;
+  final String? audioId;
+  final List<String>? languages;
+  final String? currencySymbol;
+  final List<String>? momentsIds;
+  final bool availability;
+  final String? keywordId;
+  final String? meetingUrl;
+  final String? badgeId;
+  final DateTime? timestamp;
+  final String? institutionId;
 
   const TopicModel({
-    required this.topicId,
+    this.expertId,
     required this.name,
-    required this.expertId,
+    required this.topicId,
+    this.expertName,
+    required this.description,
+    required this.topicRate,
     required this.sessionId,
-    required this.institutionId,
-    this.skillType,
+    required this.session,
+    required this.sessionType,
+    this.expertise,
+    this.rating,
+    this.location,
+    this.count,
     this.status,
+    this.skillType,
     this.imageUrl,
-    this.sessionType,
-    this.description,
+    this.audio,
+    this.audioId,
+    this.languages,
+    this.currencySymbol,
+    this.momentsIds,
+    required this.availability,
+    this.keywordId,
+    this.meetingUrl,
+    this.badgeId,
+    this.timestamp,
+    this.institutionId,
   });
 
-  /// Converts this model to a Firestore-compatible map.
-  Map<String, dynamic> toMap() {
-    return {
-      'topicId': topicId,
-      'name': name,
-      'expertId': expertId,
-      'sessionId': sessionId,
-      'institutionId': institutionId,
-      if (skillType != null) 'skillType': skillType,
-      if (status != null) 'status': status,
-      if (imageUrl != null) 'imageUrl': imageUrl,
-      if (sessionType != null) 'sessionType': sessionType,
-      if (description != null) 'description': description,
-    };
-  }
-
-  /// Creates a [TopicModel] from a Firestore [DocumentSnapshot].
-  ///
-  /// Handles:
-  /// - Missing, null, or empty `sessionId` — defaults to empty string `''`.
-  /// - Missing or null required string fields — default to empty string `''`.
-  /// - Missing or null optional fields — default to `null`.
+  /// Create model from Firestore document
   factory TopicModel.fromFirestore(DocumentSnapshot doc) {
     final data = doc.data() as Map<String, dynamic>? ?? {};
 
-    // sessionId may be absent, null, or explicitly empty — always default to ''.
-    final rawSessionId = data['sessionId'];
-    final String sessionId =
-        (rawSessionId is String && rawSessionId.isNotEmpty)
-            ? rawSessionId
-            : '';
-
     return TopicModel(
-      topicId: (data['topicId'] as String?) ?? doc.id,
+      expertId: data['expertId'] as String?,
       name: (data['name'] as String?) ?? '',
-      expertId: (data['expertId'] as String?) ?? '',
-      sessionId: sessionId,
-      institutionId: (data['institutionId'] as String?) ?? '',
-      skillType: data['skillType'] as String?,
+      topicId: (data['topicId'] as String?) ?? doc.id,
+      expertName: data['expertName'] as String?,
+      description: (data['description'] as String?) ?? '',
+      topicRate: (data['topicRate'] as num?)?.toInt() ?? 0,
+      sessionId: (data['sessionId'] as String?) ?? '',
+      session: (data['session'] as String?) ?? '',
+      sessionType: (data['sessionType'] as String?) ?? '',
+      expertise: (data['expertise'] as List<dynamic>?)
+          ?.map((e) => e.toString())
+          .toList() ??
+          [],
+      rating: (data['rating'] as num?)?.toDouble(),
+      location: data['location'] as String?,
+      count: (data['count'] as num?)?.toInt(),
       status: data['status'] as String?,
+      skillType: data['skillType'] as String?,
       imageUrl: data['imageUrl'] as String?,
-      sessionType: data['sessionType'] as String?,
-      description: data['description'] as String?,
+      audio: data['audio'],
+      audioId: data['audioId'] as String?,
+      languages: (data['languages'] as List<dynamic>?)
+          ?.map((e) => e.toString())
+          .toList() ??
+          [],
+      currencySymbol: data['currencySymbol'] as String? ?? '₹',
+      momentsIds: (data['momentsIds'] as List<dynamic>?)
+          ?.map((e) => e.toString())
+          .toList() ??
+          [],
+      availability: (data['availability'] as bool?) ?? false,
+      keywordId: data['keywordId'] as String?,
+      meetingUrl: data['meetingUrl'] as String?,
+      badgeId: data['badgeId'] as String?,
+      timestamp: data['timestamp'] != null
+          ? (data['timestamp'] as Timestamp).toDate()
+          : null,
+      institutionId: data['institutionId'] as String?,
     );
+  }
+
+  /// Convert model to JSON / Firestore map
+  Map<String, dynamic> toMap() {
+    return {
+      'expertId': expertId,
+      'name': name,
+      'topicId': topicId,
+      'expertName': expertName,
+      'description': description,
+      'topicRate': topicRate,
+      'sessionId': sessionId,
+      'session': session,
+      'sessionType': sessionType,
+      'expertise': expertise ?? [],
+      'rating': rating,
+      'location': location,
+      'count': count,
+      'status': status,
+      'skillType': skillType,
+      'imageUrl': imageUrl,
+      'audio': audio,
+      'audioId': audioId,
+      'languages': languages ?? [],
+      'currencySymbol': currencySymbol ?? '₹',
+      'momentsIds': momentsIds ?? [],
+      'availability': availability,
+      'keywordId': keywordId,
+      'meetingUrl': meetingUrl,
+      'badgeId': badgeId,
+      'timestamp':
+      timestamp != null ? Timestamp.fromDate(timestamp!) : null,
+      'institutionId': institutionId,
+    };
   }
 }

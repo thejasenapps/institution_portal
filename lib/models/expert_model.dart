@@ -1,49 +1,82 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 
-/// Represents an expert document from the Firestore `experts` collection.
 class ExpertModel {
-  /// The expert's unique Firestore document ID.
-  final String expertId;
+  String uniqueId;
+  String name;
+  String location;
+  int experience;
+  int minutes;
+  List<dynamic>? topics;
+  String intro;
+  double? rating;
+  String? review;
+  int? count;
+  String? status;
+  List<String> languages;
+  String imageFile;
+  String? imageId;
+  bool? isExpert;
+  List<String> achievements;
+  String? badgeId;
+  DateTime? timestamp;
 
-  /// The expert's display name.
-  final String name;
-
-  /// Optional biography text for the expert.
-  final String? bio;
-
-  /// Optional URL for the expert's profile image.
-  final String? profileImageUrl;
-
-  const ExpertModel({
-    required this.expertId,
+  ExpertModel({
+    required this.uniqueId,
     required this.name,
-    this.bio,
-    this.profileImageUrl,
+    required this.minutes,
+    required this.topics,
+    required this.intro,
+    required this.location,
+    required this.experience,
+    this.rating,
+    this.review,
+    this.count,
+    this.status,
+    required this.languages,
+    required this.imageFile,
+    this.imageId,
+    this.isExpert,
+    required this.achievements,
+    this.badgeId,
+    this.timestamp,
   });
 
-  /// Converts this model to a Firestore-compatible map.
-  Map<String, dynamic> toMap() {
-    return {
-      'expertId': expertId,
-      'name': name,
-      if (bio != null) 'bio': bio,
-      if (profileImageUrl != null) 'profileImageUrl': profileImageUrl,
-    };
-  }
+  Map<String, dynamic> toMap() => {
+    'uniqueId': uniqueId,
+    'name': name,
+    'minutes': minutes,
+    'experience': experience,
+    'location': location,
+    'topics': topics,
+    'intro': intro,
+    'status': status ?? "offline",
+    'languages': languages,
+    'imageFile': imageFile,
+    'imageId': imageId ?? '',
+    'isExpert': isExpert ?? false,
+    'achievements': achievements ,
+    'badgeId': badgeId ?? '',
+    'timestamp': timestamp,
+  };
 
-  /// Creates an [ExpertModel] from a Firestore [DocumentSnapshot].
-  ///
-  /// Handles:
-  /// - Missing or null required string fields — default to empty string `''`.
-  /// - Missing or null optional fields (`bio`, `profileImageUrl`) — default to `null`.
-  factory ExpertModel.fromFirestore(DocumentSnapshot doc) {
-    final data = doc.data() as Map<String, dynamic>? ?? {};
-
-    return ExpertModel(
-      expertId: (data['expertId'] as String?) ?? doc.id,
-      name: (data['name'] as String?) ?? '',
-      bio: data['bio'] as String?,
-      profileImageUrl: data['profileImageUrl'] as String?,
-    );
-  }
+  factory ExpertModel.fromFirestore(Map<String, dynamic> json) => ExpertModel(
+      uniqueId: json["uniqueId"] ?? '',
+      name: json["name"] ?? '',
+      minutes: json["minutes"] ?? 60,
+      experience: json["experience"] ?? 0,
+      location: json["location"] ?? "unknown",
+      topics: json["topics"] ?? [],
+      intro: json["intro"] ?? '',
+      rating: (json['rating'] ?? 0 as num?)?.toDouble(),
+      review: json['review'] ?? '',
+      count: json["count"] ?? 0,
+      status: json["status"] ?? "online",
+      languages: json["languages"] != null ? List<String>.from(json["languages"]) : [],
+      imageFile: json["imageFile"] ?? '',
+      imageId: json["imageId"] ?? '',
+      achievements: json["achievements"] != null ? List<String>.from(json["achievements"]) : [],
+      isExpert: json["isExpert"] ?? true,
+      badgeId: json["badgeId"] ?? '',
+      timestamp: json["timestamp"] != null ? (json["timestamp"] as Timestamp).toDate() : null,
+  );
 }

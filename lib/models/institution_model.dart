@@ -3,12 +3,9 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 /// Represents the subscription status of a [SubscriptionHistoryEntry].
 enum SubscriptionStatus { active, expired }
 
-/// A single entry in an institution's subscription history.
+/// A single subscription history entry.
 class SubscriptionHistoryEntry {
-  /// The UTC start date of this subscription period.
   final DateTime startDate;
-
-  /// The UTC end date of this subscription period.
   final DateTime endDate;
 
   const SubscriptionHistoryEntry({
@@ -16,23 +13,20 @@ class SubscriptionHistoryEntry {
     required this.endDate,
   });
 
-  /// Returns the duration of this subscription period in whole days.
   int get durationDays => endDate.difference(startDate).inDays;
 
-  /// Returns [SubscriptionStatus.active] if the current UTC time falls within
-  /// [startDate, endDate] (inclusive on both ends), otherwise [SubscriptionStatus.expired].
   SubscriptionStatus get status {
     final now = DateTime.now().toUtc();
+
     if ((now.isAfter(startDate) && now.isBefore(endDate)) ||
         now.isAtSameMomentAs(startDate) ||
         now.isAtSameMomentAs(endDate)) {
       return SubscriptionStatus.active;
     }
+
     return SubscriptionStatus.expired;
   }
 
-  /// Creates a [SubscriptionHistoryEntry] from a Firestore map.
-  /// Handles both [Timestamp] and [String] date representations.
   factory SubscriptionHistoryEntry.fromMap(Map<String, dynamic> map) {
     return SubscriptionHistoryEntry(
       startDate: _parseDateTime(map['startDate']),
@@ -40,7 +34,6 @@ class SubscriptionHistoryEntry {
     );
   }
 
-  /// Converts this entry to a Firestore-compatible map.
   Map<String, dynamic> toMap() {
     return {
       'startDate': Timestamp.fromDate(startDate),
@@ -48,112 +41,195 @@ class SubscriptionHistoryEntry {
     };
   }
 
-  /// Parses a [Timestamp] or ISO-8601 [String] into a UTC [DateTime].
-  /// Returns [DateTime.utc(1970)] as a safe fallback for null/unknown values.
   static DateTime _parseDateTime(dynamic value) {
     if (value is Timestamp) {
       return value.toDate().toUtc();
     }
+
     if (value is String) {
       return DateTime.parse(value).toUtc();
     }
-    // Fallback: epoch UTC
+
     return DateTime.utc(1970);
   }
 }
 
-/// Represents an institution document from the Firestore `institutions` collection.
+/// Institution model aligned with InstitutionEntity.
 class InstitutionModel {
-  /// The institution's unique identifier (value of the `id` field, not the Firestore doc ID).
   final String id;
-
-  /// The institution's email address.
-  final String email;
-
-  /// The institution's display name.
   final String name;
+  final dynamic logo;
+  final String? email;
+  final bool subscriptionStatus;
+  final DateTime? subscriptionStartDate;
+  final String domainUrl;
+  final int? trialLimit;
+  final DateTime? subscriptionEndDate;
+  final int? subscriptionAmount;
 
-  /// Optional URL for the institution's logo image.
-  final String? logoUrl;
+  /// Full structured subscription history
+  final List<SubscriptionHistoryEntry>? subscriptionHistory;
 
-  /// Optional UTC date/time when the current subscription expires.
-  final DateTime? subscriptionExpiry;
-
-  /// Optional name of the current subscription plan.
-  final String? plan;
-
-  /// Ordered list of past and current subscription periods.
-  final List<SubscriptionHistoryEntry> subscriptionHistory;
+  final String? origin;
+  final DateTime? registeredAt;
 
   const InstitutionModel({
     required this.id,
-    required this.email,
     required this.name,
-    this.logoUrl,
-    this.subscriptionExpiry,
-    this.plan,
-    this.subscriptionHistory = const [],
+    required this.logo,
+    required this.subscriptionStatus,
+    required this.domainUrl,
+    required this.email,
+    this.subscriptionStartDate,
+    this.trialLimit,
+    this.subscriptionEndDate,
+    this.subscriptionAmount,
+    this.subscriptionHistory,
+    this.origin,
+    this.registeredAt,
   });
 
-  /// Creates an [InstitutionModel] from a Firestore [DocumentSnapshot].
-  ///
-  /// Handles:
-  /// - Missing or null fields gracefully (nullable fields default to null,
-  ///   required string fields default to empty string).
-  /// - Firestore [Timestamp] → [DateTime] conversion for date fields.
-  /// - Parsing the `subscriptionHistory` array of maps.
+  // ---------------------------------------------------------------------------
+  // Computed subscription helpers
+  // ---------------------------------------------------------------------------
+
+  /// Returns the end date of the most recent subscription history entry.
+  /// Falls back to [subscriptionEndDate] if history is absent or empty.
+  DateTime? get currentSubscriptionEndDate {
+    final history = subscriptionHistory;
+    if (history != null && history.isNotEmpty) {
+      // Pick the entry whose endDate is the latest.
+      final latest = history.reduce(
+        (a, b) => a.endDate.isAfter(b.endDate) ? a : b,
+      );
+      return latest.endDate;
+    }
+    return subscriptionEndDate;
+  }
+
+  /// Returns the start date of the most recent subscription history entry.
+  /// Falls back to [subscriptionStartDate] if history is absent or empty.
+  DateTime? get currentSubscriptionStartDate {
+    final history = subscriptionHistory;
+    if (history != null && history.isNotEmpty) {
+      final latest = history.reduce(
+        (a, b) => a.endDate.isAfter(b.endDate) ? a : b,
+      );
+      return latest.startDate;
+    }
+    return subscriptionStartDate;
+  }
+
+  /// Whether the current subscription is active, calculated from
+  /// [currentSubscriptionStartDate] and [currentSubscriptionEndDate].
+  /// Does NOT rely on the stored [subscriptionStatus] bool.
+  bool get isSubscriptionActive {
+    final start = currentSubscriptionStartDate;
+    final end = currentSubscriptionEndDate;
+    if (start == null || end == null) return false;
+    final now = DateTime.now().toUtc();
+    return (now.isAfter(start) || now.isAtSameMomentAs(start)) &&
+        (now.isBefore(end) || now.isAtSameMomentAs(end));
+  }
+
+  /// Human-readable subscription plan label derived from [subscriptionAmount].
+  String get subscriptionPlan {
+    if (subscriptionAmount == null) return '—';
+    return '\$${subscriptionAmount!} / month';
+  }
+
+  /// Create from Firestore document
   factory InstitutionModel.fromFirestore(DocumentSnapshot doc) {
     final data = doc.data() as Map<String, dynamic>? ?? {};
 
-    // Parse subscriptionHistory array
+    // Parse subscription history
     final rawHistory = data['subscriptionHistory'];
-    final List<SubscriptionHistoryEntry> history = [];
-    if (rawHistory is List) {
-      for (final entry in rawHistory) {
-        if (entry is Map<String, dynamic>) {
-          try {
-            history.add(SubscriptionHistoryEntry.fromMap(entry));
-          } catch (_) {
-            // Skip malformed entries rather than crashing
-          }
-        }
-      }
-    }
+    List<SubscriptionHistoryEntry>? history;
 
-    // Parse optional subscriptionExpiry timestamp
-    DateTime? subscriptionExpiry;
-    final rawExpiry = data['subscriptionExpiry'];
-    if (rawExpiry is Timestamp) {
-      subscriptionExpiry = rawExpiry.toDate().toUtc();
-    } else if (rawExpiry is String) {
-      subscriptionExpiry = DateTime.tryParse(rawExpiry)?.toUtc();
+    if (rawHistory is List) {
+      history = rawHistory
+          .whereType<Map<String, dynamic>>()
+          .map((e) => SubscriptionHistoryEntry.fromMap(e))
+          .toList();
     }
 
     return InstitutionModel(
       id: (data['id'] as String?) ?? '',
-      email: (data['email'] as String?) ?? '',
       name: (data['name'] as String?) ?? '',
-      logoUrl: data['logoUrl'] as String?,
-      subscriptionExpiry: subscriptionExpiry,
-      plan: data['plan'] as String?,
+      logo: data['logo'],
+      email: data['email'],
+      subscriptionStatus:
+      (data['subscriptionStatus'] as bool?) ?? false,
+      domainUrl: (data['domainUrl'] as String?) ?? '',
+      subscriptionStartDate:
+      _parseNullableDate(data['subscriptionStartDate']),
+      subscriptionEndDate:
+      _parseNullableDate(data['subscriptionEndDate']),
+      subscriptionAmount: data['subscriptionAmount'] as int?,
       subscriptionHistory: history,
+      trialLimit: data['trialLimit'] as int?,
+      origin: data['origin'] as String?,
+      registeredAt: _parseNullableDate(data['registeredAt']),
     );
   }
 
-  /// Converts this model to a Firestore-compatible map.
-  ///
-  /// Suitable for use in Firestore write operations.
+  /// Convert model to Firestore map
   Map<String, dynamic> toMap() {
     return {
       'id': id,
-      'email': email,
       'name': name,
-      if (logoUrl != null) 'logoUrl': logoUrl,
-      if (subscriptionExpiry != null)
-        'subscriptionExpiry': Timestamp.fromDate(subscriptionExpiry!),
-      if (plan != null) 'plan': plan,
-      'subscriptionHistory':
-          subscriptionHistory.map((e) => e.toMap()).toList(),
+      'logo': logo,
+      'email': email,
+      'subscriptionStatus': subscriptionStatus,
+      'domainUrl': domainUrl,
+
+      if (subscriptionStartDate != null)
+        'subscriptionStartDate':
+        Timestamp.fromDate(subscriptionStartDate!),
+
+      if (subscriptionEndDate != null)
+        'subscriptionEndDate':
+        Timestamp.fromDate(subscriptionEndDate!),
+
+      if (subscriptionAmount != null)
+        'subscriptionAmount': subscriptionAmount,
+
+      if (subscriptionHistory != null)
+        'subscriptionHistory':
+        subscriptionHistory!.map((e) => e.toMap()).toList(),
+
+      if (trialLimit != null)
+        'trialLimit': trialLimit,
+
+      if (origin != null)
+        'origin': origin,
+
+      if (registeredAt != null)
+        'registeredAt': Timestamp.fromDate(registeredAt!),
     };
+  }
+
+  /// Empty factory
+  factory InstitutionModel.empty() {
+    return const InstitutionModel(
+      id: '',
+      name: '',
+      logo: '',
+      subscriptionStatus: false,
+      domainUrl: '',
+      email: ''
+    );
+  }
+
+  static DateTime? _parseNullableDate(dynamic value) {
+    if (value is Timestamp) {
+      return value.toDate().toUtc();
+    }
+
+    if (value is String) {
+      return DateTime.tryParse(value)?.toUtc();
+    }
+
+    return null;
   }
 }
