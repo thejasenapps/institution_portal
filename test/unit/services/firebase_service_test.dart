@@ -1,16 +1,29 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:fake_cloud_firestore/fake_cloud_firestore.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:mocktail/mocktail.dart';
+import 'package:institution_portal/services/anonymous_auth_service.dart';
 import 'package:institution_portal/services/firebase_service.dart';
+
+class MockAnonymousAuthService extends Mock implements AnonymousAuthService {}
 
 void main() {
   group('FirebaseService', () {
     late FakeFirebaseFirestore fakeFirestore;
     late FirebaseService service;
+    late MockAnonymousAuthService mockAnonymousAuthService;
 
     setUp(() {
       fakeFirestore = FakeFirebaseFirestore();
-      service = FirebaseService(fakeFirestore);
+      mockAnonymousAuthService = MockAnonymousAuthService();
+      when(
+        () => mockAnonymousAuthService.ensureAuthenticated(),
+      ).thenAnswer((_) async {});
+
+      service = FirebaseService(
+        fakeFirestore,
+        anonymousAuthService: mockAnonymousAuthService,
+      );
     });
 
     // -------------------------------------------------------------------------
@@ -142,6 +155,9 @@ void main() {
         final updated = await docRef.get();
         final data = updated.data() as Map<String, dynamic>;
         expect(data['name'], equals('New Name'));
+        verify(
+          () => mockAnonymousAuthService.ensureAuthenticated(),
+        ).called(1);
       });
 
       test('throws FirebaseServiceException when institution document not found',
@@ -175,10 +191,26 @@ void main() {
         final updated = await docRef.get();
         final data = updated.data() as Map<String, dynamic>;
         expect(data['logoUrl'], equals(newLogoUrl));
+        expect(data['logo'], equals(newLogoUrl));
+        verify(
+          () => mockAnonymousAuthService.ensureAuthenticated(),
+        ).called(1);
       });
 
       test('throws FirebaseServiceException when institution document not found',
           () async {
+        expect(
+          () => service.updateInstitutionLogoUrl(
+              'nonexistent-id', 'https://example.com/logo.png'),
+          throwsA(isA<FirebaseServiceException>()),
+        );
+      });
+
+      test('throws when anonymous auth bootstrap fails before write', () async {
+        when(
+          () => mockAnonymousAuthService.ensureAuthenticated(),
+        ).thenThrow(Exception('auth failed'));
+
         expect(
           () => service.updateInstitutionLogoUrl(
               'nonexistent-id', 'https://example.com/logo.png'),

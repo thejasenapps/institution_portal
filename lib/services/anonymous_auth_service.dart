@@ -24,6 +24,11 @@ class AnonymousAuthService {
     return credential.user!;
   }
 
+  /// Ensures a Firebase auth session exists, without exposing [User].
+  Future<void> ensureAuthenticated() async {
+    await ensureSignedIn();
+  }
+
   /// The currently signed-in [User], or `null` if not yet authenticated.
   User? get currentUser => _auth.currentUser;
 

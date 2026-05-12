@@ -9,6 +9,8 @@ import 'controllers/theme_controller.dart';
 import 'firebase_options.dart';
 import 'routes/app_pages.dart';
 import 'routes/app_routes.dart';
+import 'services/anonymous_auth_service.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -17,6 +19,12 @@ void main() async {
   final prefs = await SharedPreferences.getInstance();
   Get.put<SharedPreferences>(prefs, permanent: true);
   Get.put<ThemeController>(ThemeController(GetStorage()), permanent: true);
+  try {
+    await AnonymousAuthService(FirebaseAuth.instance).ensureSignedIn();
+  } catch (e) {
+    // ignore: avoid_print
+    print('Anonymous auth bootstrap failed: $e');
+  }
   runApp(const InstitutionPortalApp());
 }
 

@@ -137,6 +137,7 @@ class ProfileController extends GetxController {
     // Open file picker via ImagePickerPlugin.
     // We use getImageFromSource (accepts image/*) and then validate the
     // extension to enforce JPEG/PNG-only restriction.
+    isUploadingLogo.value = true;
     final picker = ImagePickerPlugin();
     final XFile? pickedFile =
         await picker.getImageFromSource(source: ImageSource.gallery);
@@ -174,7 +175,6 @@ class ProfileController extends GetxController {
       return;
     }
 
-    isUploadingLogo.value = true;
     try {
       // Resize and encode the image
       final resizedBytes = await _imageResizer.resizeAndEncode(bytes);
@@ -185,7 +185,7 @@ class ProfileController extends GetxController {
       final uploadResult =
           await _fileUploader.uploadFile(resizedBytes, filename);
 
-      final logoUrl = uploadResult['url'] as String?;
+      final logoUrl = uploadResult['media-url'] as String?;
       if (logoUrl == null || logoUrl.isEmpty) {
         _showErrorSnackBar(
             'Upload succeeded but no URL was returned. Please try again.');

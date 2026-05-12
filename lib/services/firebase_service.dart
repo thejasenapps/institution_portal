@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 
+import 'anonymous_auth_service.dart';
 import '../models/expert_model.dart';
 import '../models/institution_model.dart';
 import '../models/session_model.dart';
@@ -31,13 +32,29 @@ class FirebaseServiceException implements Exception {
 /// [FirebaseServiceException].
 class FirebaseService {
   final FirebaseFirestore _firestore;
+  final AnonymousAuthService? _anonymousAuthService;
 
   /// The timeout applied to every Firestore operation.
   static const Duration _timeout = Duration(seconds: 2);
 
   /// Creates a [FirebaseService] backed by the given [FirebaseFirestore]
   /// instance.
-  FirebaseService(this._firestore);
+  FirebaseService(
+    this._firestore, {
+    AnonymousAuthService? anonymousAuthService,
+  }) : _anonymousAuthService = anonymousAuthService;
+
+  Future<void> _ensureAuthenticatedWrite() async {
+    if (_anonymousAuthService == null) return;
+    try {
+      await _anonymousAuthService.ensureAuthenticated();
+    } catch (e) {
+      throw FirebaseServiceException(
+        'Authentication is required before writing institution updates.',
+        cause: e,
+      );
+    }
+  }
 
   // ---------------------------------------------------------------------------
   // READ METHODS
@@ -178,6 +195,8 @@ class FirebaseService {
   Future<void> updateInstitutionName(
       String institutionId, String name) async {
     try {
+      await _ensureAuthenticatedWrite();
+
       final snapshot = await _firestore
           .collection('institutions')
           .where('id', isEqualTo: institutionId)
@@ -211,6 +230,8 @@ class FirebaseService {
   Future<void> updateInstitutionLogoUrl(
       String institutionId, String logoUrl) async {
     try {
+      await _ensureAuthenticatedWrite();
+
       final snapshot = await _firestore
           .collection('institutions')
           .where('id', isEqualTo: institutionId)
@@ -225,7 +246,7 @@ class FirebaseService {
       }
 
       await snapshot.docs.first.reference
-          .update({'logoUrl': logoUrl}).timeout(_timeout);
+          .update({'logo': logoUrl, 'logoUrl': logoUrl}).timeout(_timeout);
     } on FirebaseServiceException {
       rethrow;
     } catch (e) {

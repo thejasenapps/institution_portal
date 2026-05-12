@@ -1,1 +1,34 @@
-{"flutter":{"platforms":{"android":{"default":{"projectId":"reachex-e4ca8","appId":"1:52444324463:android:47efe03635d3315eb9a39a","fileOutput":"android/app/google-services.json"}},"ios":{"default":{"projectId":"reachex-e4ca8","appId":"1:52444324463:ios:5e9272d618b30402b9a39a","uploadDebugSymbols":false,"fileOutput":"ios/Runner/GoogleService-Info.plist"}},"dart":{"lib/firebase_options.dart":{"projectId":"reachex-e4ca8","configurations":{"android":"1:52444324463:android:47efe03635d3315eb9a39a","ios":"1:52444324463:ios:5e9272d618b30402b9a39a","web":"1:52444324463:web:4c56646c24aade00b9a39a"}}}}}}
+{
+  "flutter": {
+    "platforms": {
+      "android": {
+        "default": {
+          "projectId": "reachex-e4ca8",
+          "appId": "1:52444324463:android:47efe03635d3315eb9a39a",
+          "fileOutput": "android/app/google-services.json"
+        }
+      },
+      "ios": {
+        "default": {
+          "projectId": "reachex-e4ca8",
+          "appId": "1:52444324463:ios:5e9272d618b30402b9a39a",
+          "uploadDebugSymbols": false,
+          "fileOutput": "ios/Runner/GoogleService-Info.plist"
+        }
+      },
+      "dart": {
+        "lib/firebase_options.dart": {
+          "projectId": "reachex-e4ca8",
+          "configurations": {
+            "android": "1:52444324463:android:47efe03635d3315eb9a39a",
+            "ios": "1:52444324463:ios:5e9272d618b30402b9a39a",
+            "web": "1:52444324463:web:4c56646c24aade00b9a39a"
+          }
+        }
+      }
+    }
+  },
+  "firestore": {
+    "rules": "firestore.rules"
+  }
+}
