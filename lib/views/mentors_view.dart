@@ -70,8 +70,9 @@ class _MentorsViewState extends State<MentorsView> {
     if (width >= Breakpoints.tablet) {
       // Desktop / tablet ≥ 1024 px: show inline panel.
       setState(() {
-        _selectedMentor =
-            _selectedMentor?.expertId == mentor.expertId ? null : mentor;
+        _selectedMentor = _selectedMentor?.expertId == mentor.expertId
+            ? null
+            : mentor;
       });
     } else {
       // Mobile < 1024 px: navigate to detail route.
@@ -88,57 +89,66 @@ class _MentorsViewState extends State<MentorsView> {
 
   @override
   Widget build(BuildContext context) {
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        final width = constraints.maxWidth;
-        final isDesktop = width >= Breakpoints.tablet;
+    return Scaffold(
+      backgroundColor: Colors.transparent,
+      body: LayoutBuilder(
+        builder: (context, constraints) {
+          final width = constraints.maxWidth;
+          final isDesktop = width >= Breakpoints.tablet;
 
-        return Obx(() {
-          final isLoading = _mentorController.isLoading.value;
-          final hasError = _mentorController.hasError.value;
-          final mentors = _mentorController.mentorList;
+          return Obx(() {
+            final isLoading = _mentorController.isLoading.value;
+            final hasError = _mentorController.hasError.value;
+            final mentors = _mentorController.mentorList;
 
-          return Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              // ── Loading indicator ─────────────────────────────────────────
-              if (isLoading)
-                const LinearProgressIndicator()
-              else
-                const SizedBox(height: 4.0),
+            return Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                // ── Loading indicator ─────────────────────────────────────────
+                if (isLoading)
+                  const LinearProgressIndicator()
+                else
+                  const SizedBox(height: 4.0),
 
-              // ── Main content ──────────────────────────────────────────────
-              Expanded(
-                child: hasError
-                    ? _ErrorState(onRetry: _onRetry)
-                    : Row(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          // Table area
-                          Expanded(
-                            child: _MentorTableArea(
-                              mentors: mentors,
-                              selectedExpertId: _selectedMentor?.expertId,
-                              onRowTap: (mentor) =>
-                                  _onRowTap(context, mentor, width),
+                // ── Main content ──────────────────────────────────────────────
+                Expanded(
+                  child: hasError
+                      ? _ErrorState(onRetry: _onRetry)
+                      : Row(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            // Table area
+                            Expanded(
+                              child: _MentorTableArea(
+                                mentors: mentors,
+                                selectedExpertId: _selectedMentor?.expertId,
+                                onRowTap: (mentor) =>
+                                    _onRowTap(context, mentor, width),
+                              ),
                             ),
-                          ),
-                          // Inline detail panel (desktop only)
-                          if (isDesktop && _selectedMentor != null)
-                            MentorDetailPanel(
-                              mentor: _selectedMentor!,
-                              onClose: _closePanel,
-                              isInlinePanel: true,
-                            ),
-                        ],
-                      ),
-              ),
-            ],
-          );
-        });
-      },
+                            // Inline detail panel (desktop only)
+                            if (isDesktop && _selectedMentor != null)
+                              MentorDetailPanel(
+                                mentor: _selectedMentor!,
+                                onClose: _closePanel,
+                                isInlinePanel: true,
+                              ),
+                          ],
+                        ),
+                ),
+              ],
+            );
+          });
+        },
+      ),
     );
   }
+}
+
+String _mentorInitial(String name) {
+  final t = name.trim();
+  if (t.isEmpty) return '?';
+  return t[0].toUpperCase();
 }
 
 // ---------------------------------------------------------------------------
@@ -162,6 +172,13 @@ class _MentorTableArea extends StatelessWidget {
       return const _EmptyState();
     }
 
+    final colorScheme = Theme.of(context).colorScheme;
+    final headingStyle = Theme.of(context).textTheme.labelLarge?.copyWith(
+      fontWeight: FontWeight.w600,
+      color: colorScheme.onSurfaceVariant,
+      letterSpacing: 0.2,
+    );
+
     return SingleChildScrollView(
       padding: const EdgeInsets.all(24.0),
       child: Column(
@@ -169,52 +186,141 @@ class _MentorTableArea extends StatelessWidget {
         children: [
           Text(
             'Mentors',
-            style: Theme.of(context).textTheme.headlineSmall,
+            style: Theme.of(
+              context,
+            ).textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.w700),
           ),
-          const SizedBox(height: 16.0),
-          SingleChildScrollView(
-            scrollDirection: Axis.horizontal,
-            child: DataTable(
-              showCheckboxColumn: false,
-              columns: const [
-                DataColumn(label: Text('ID')),
-                DataColumn(label: Text('Mentor Name')),
-                DataColumn(label: Text('Topic Name')),
-                DataColumn(label: Text('Price')),
-              ],
-              rows: mentors.map((mentor) {
-                final isSelected = mentor.expertId == selectedExpertId;
-                return DataRow(
-                  selected: isSelected,
-                  onSelectChanged: (_) => onRowTap(mentor),
-                  cells: [
-                    DataCell(
-                      Text(
-                        mentor.expertId,
-                        overflow: TextOverflow.ellipsis,
+          const SizedBox(height: 6),
+          Text(
+            'Manage institutional mentoring resources and assignments.',
+            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+              color: colorScheme.onSurfaceVariant,
+            ),
+          ),
+          const SizedBox(height: 22.0),
+          Card(
+            clipBehavior: Clip.antiAlias,
+            child: SingleChildScrollView(
+              scrollDirection: Axis.horizontal,
+              child: DataTable(
+                showCheckboxColumn: false,
+                horizontalMargin: 20,
+                dataRowMinHeight: 46,
+                dataRowColor: WidgetStateProperty.resolveWith<Color?>((
+                  Set<WidgetState> states,
+                ) {
+                  if (states.contains(WidgetState.selected)) {
+                    return colorScheme.primaryContainer.withValues(alpha: 0.42);
+                  }
+                  return null;
+                }),
+                headingTextStyle: headingStyle,
+                columns: [
+                  DataColumn(label: Text('ID', style: headingStyle)),
+                  DataColumn(label: Text('Mentor Name', style: headingStyle)),
+                  DataColumn(label: Text('Topic Name', style: headingStyle)),
+                  DataColumn(label: Text('Price', style: headingStyle)),
+                ],
+                rows: mentors.map((mentor) {
+                  final isSelected = mentor.expertId == selectedExpertId;
+                  return DataRow(
+                    selected: isSelected,
+                    onSelectChanged: (_) => onRowTap(mentor),
+                    cells: [
+                      DataCell(
+                        ConstrainedBox(
+                          constraints: const BoxConstraints(maxWidth: 240),
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 10,
+                              vertical: 6,
+                            ),
+                            decoration: BoxDecoration(
+                              color: colorScheme.surfaceContainerHighest,
+                              borderRadius: BorderRadius.circular(999),
+                              border: Border.all(
+                                color: colorScheme.outlineVariant.withValues(
+                                  alpha: 0.6,
+                                ),
+                              ),
+                            ),
+                            child: Text(
+                              mentor.expertId,
+                              overflow: TextOverflow.ellipsis,
+                              style: Theme.of(context).textTheme.bodySmall
+                                  ?.copyWith(fontFamily: 'monospace'),
+                              maxLines: 1,
+                            ),
+                          ),
+                        ),
                       ),
-                    ),
-                    DataCell(
-                      Text(
-                        mentor.mentorName,
-                        overflow: TextOverflow.ellipsis,
+                      DataCell(
+                        Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            CircleAvatar(
+                              radius: 18,
+                              backgroundColor: colorScheme.primary.withValues(
+                                alpha: 0.12,
+                              ),
+                              child: Text(
+                                _mentorInitial(mentor.mentorName),
+                                style: TextStyle(
+                                  color: colorScheme.primary,
+                                  fontWeight: FontWeight.w700,
+                                  fontSize: 13,
+                                ),
+                              ),
+                            ),
+                            const SizedBox(width: 10),
+                            Flexible(
+                              child: Text(
+                                mentor.mentorName,
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                            ),
+                          ],
+                        ),
                       ),
-                    ),
-                    DataCell(
-                      Text(
-                        mentor.topicName,
-                        overflow: TextOverflow.ellipsis,
+                      DataCell(
+                        ConstrainedBox(
+                          constraints: const BoxConstraints(maxWidth: 260),
+                          child: Text(
+                            mentor.topicName,
+                            overflow: TextOverflow.ellipsis,
+                            maxLines: 2,
+                            style: Theme.of(context).textTheme.bodyMedium
+                                ?.copyWith(fontWeight: FontWeight.w600),
+                          ),
+                        ),
                       ),
-                    ),
-                    DataCell(
-                      Text(
-                        mentor.price,
-                        overflow: TextOverflow.ellipsis,
+                      DataCell(
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          mainAxisSize: MainAxisSize.min,
+                          spacing: 2,
+                          children: [
+                            Text(
+                              '₹',
+                              style: Theme.of(context).textTheme.labelSmall
+                                  ?.copyWith(
+                                color: colorScheme.onSurfaceVariant,
+                              ),
+                            ),
+                            Text(
+                              mentor.price,
+                              style: Theme.of(context).textTheme.titleSmall
+                                  ?.copyWith(fontWeight: FontWeight.w700),
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ],
+                        ),
                       ),
-                    ),
-                  ],
-                );
-              }).toList(),
+                    ],
+                  );
+                }).toList(),
+              ),
             ),
           ),
         ],
@@ -247,8 +353,8 @@ class _EmptyState extends StatelessWidget {
             Text(
               MentorErrors.noMentors,
               style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                    color: Theme.of(context).colorScheme.onSurfaceVariant,
-                  ),
+                color: Theme.of(context).colorScheme.onSurfaceVariant,
+              ),
               textAlign: TextAlign.center,
             ),
           ],
@@ -290,8 +396,8 @@ class _ErrorState extends StatelessWidget {
             Text(
               'Please check your connection and try again.',
               style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                    color: Theme.of(context).colorScheme.onSurfaceVariant,
-                  ),
+                color: Theme.of(context).colorScheme.onSurfaceVariant,
+              ),
               textAlign: TextAlign.center,
             ),
             const SizedBox(height: 24.0),

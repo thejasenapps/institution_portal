@@ -28,10 +28,15 @@ class StatCard extends StatelessWidget {
     final textTheme = Theme.of(context).textTheme;
 
     return Card(
-      elevation: 2.0,
+      elevation: 0,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(12.0),
+        side: BorderSide(
+          color: colorScheme.outlineVariant.withValues(alpha: 0.45),
+          width: 1,
+        ),
       ),
+      shadowColor: colorScheme.shadow.withValues(alpha: 0.05),
       child: Padding(
         padding: const EdgeInsets.all(20.0),
         child: Row(
@@ -41,14 +46,10 @@ class StatCard extends StatelessWidget {
               width: 48.0,
               height: 48.0,
               decoration: BoxDecoration(
-                color: colorScheme.primaryContainer,
+                color: colorScheme.primaryContainer.withValues(alpha: 0.55),
                 borderRadius: BorderRadius.circular(12.0),
               ),
-              child: Icon(
-                icon,
-                color: colorScheme.onPrimaryContainer,
-                size: 24.0,
-              ),
+              child: Icon(icon, color: colorScheme.primary, size: 24.0),
             ),
             const SizedBox(width: 16.0),
             // Title and value.

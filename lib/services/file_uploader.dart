@@ -14,8 +14,7 @@ class CloudinaryException implements Exception {
   const CloudinaryException(this.statusCode, this.responseBody);
 
   @override
-  String toString() =>
-      'CloudinaryException: HTTP $statusCode — $responseBody';
+  String toString() => 'CloudinaryException: HTTP $statusCode — $responseBody';
 }
 
 /// Encapsulates all media upload operations via the Cloudinary REST proxy.
@@ -42,23 +41,19 @@ class FileUploader {
   ///
   /// Throws [CloudinaryException] on non-2xx response.
   Future<Map<String, dynamic>> uploadFile(
-      Uint8List bytes, String filename) async {
+    Uint8List bytes,
+    String filename,
+  ) async {
     try {
       final formData = FormData.fromMap({
-        'file': MultipartFile.fromBytes(
-          bytes,
-          filename: filename,
-        ),
+        'file': MultipartFile.fromBytes(bytes, filename: filename),
       });
 
       final response = await _dio
           .post(
             '$_baseUrl/upload-media',
             data: formData,
-            options: Options(
-              sendTimeout: _timeout,
-              receiveTimeout: _timeout,
-            ),
+            options: Options(sendTimeout: _timeout, receiveTimeout: _timeout),
           )
           .timeout(_timeout);
 
@@ -97,24 +92,15 @@ class FileUploader {
   ) async {
     try {
       final formData = FormData.fromMap({
-        'file': MultipartFile.fromBytes(
-          bytes,
-          filename: filename,
-        ),
+        'file': MultipartFile.fromBytes(bytes, filename: filename),
       });
 
       final response = await _dio
           .put(
             '$_baseUrl/update-media',
             data: formData,
-            queryParameters: {
-              'public_id': publicId,
-              'type': type,
-            },
-            options: Options(
-              sendTimeout: _timeout,
-              receiveTimeout: _timeout,
-            ),
+            queryParameters: {'public_id': publicId, 'type': type},
+            options: Options(sendTimeout: _timeout, receiveTimeout: _timeout),
           )
           .timeout(_timeout);
 
@@ -150,14 +136,8 @@ class FileUploader {
       final response = await _dio
           .delete(
             '$_baseUrl/delete-media',
-            queryParameters: {
-              'public_id': publicId,
-              'type': type,
-            },
-            options: Options(
-              sendTimeout: _timeout,
-              receiveTimeout: _timeout,
-            ),
+            queryParameters: {'public_id': publicId, 'type': type},
+            options: Options(sendTimeout: _timeout, receiveTimeout: _timeout),
           )
           .timeout(_timeout);
 

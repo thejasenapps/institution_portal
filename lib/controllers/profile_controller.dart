@@ -47,9 +47,9 @@ class ProfileController extends GetxController {
     required FirebaseService firebaseService,
     required FileUploader fileUploader,
     required ImageResizer imageResizer,
-  })  : _firebaseService = firebaseService,
-        _fileUploader = fileUploader,
-        _imageResizer = imageResizer;
+  }) : _firebaseService = firebaseService,
+       _fileUploader = fileUploader,
+       _imageResizer = imageResizer;
 
   // ---------------------------------------------------------------------------
   // Public methods
@@ -88,7 +88,9 @@ class ProfileController extends GetxController {
     final previousInstitution = institution.value;
     try {
       await _firebaseService.updateInstitutionName(
-          institutionId, newName.trim());
+        institutionId,
+        newName.trim(),
+      );
 
       // Update the in-memory model to reflect the saved name.
       // All fields are preserved so computed getters remain correct.
@@ -119,7 +121,9 @@ class ProfileController extends GetxController {
     } catch (e) {
       // Revert to previous value on failure
       institution.value = previousInstitution;
-      _showErrorSnackBar('Failed to update institution name. Please try again.');
+      _showErrorSnackBar(
+        'Failed to update institution name. Please try again.',
+      );
     } finally {
       isSavingName.value = false;
     }
@@ -139,8 +143,9 @@ class ProfileController extends GetxController {
     // extension to enforce JPEG/PNG-only restriction.
     isUploadingLogo.value = true;
     final picker = ImagePickerPlugin();
-    final XFile? pickedFile =
-        await picker.getImageFromSource(source: ImageSource.gallery);
+    final XFile? pickedFile = await picker.getImageFromSource(
+      source: ImageSource.gallery,
+    );
 
     if (pickedFile == null) {
       // User cancelled the picker.
@@ -182,13 +187,16 @@ class ProfileController extends GetxController {
       // Upload to Cloudinary via FileUploader
       final filename =
           'logo_${institutionId}_${DateTime.now().millisecondsSinceEpoch}.jpg';
-      final uploadResult =
-          await _fileUploader.uploadFile(resizedBytes, filename);
+      final uploadResult = await _fileUploader.uploadFile(
+        resizedBytes,
+        filename,
+      );
 
       final logoUrl = uploadResult['media-url'] as String?;
       if (logoUrl == null || logoUrl.isEmpty) {
         _showErrorSnackBar(
-            'Upload succeeded but no URL was returned. Please try again.');
+          'Upload succeeded but no URL was returned. Please try again.',
+        );
         return;
       }
 
@@ -222,8 +230,7 @@ class ProfileController extends GetxController {
         snackPosition: SnackPosition.BOTTOM,
       );
     } catch (e) {
-      _showErrorSnackBar(
-          'Failed to upload logo. Please try again.');
+      _showErrorSnackBar('Failed to upload logo. Please try again.');
     } finally {
       isUploadingLogo.value = false;
     }
@@ -253,10 +260,6 @@ class ProfileController extends GetxController {
   // ---------------------------------------------------------------------------
 
   void _showErrorSnackBar(String message) {
-    Get.snackbar(
-      'Error',
-      message,
-      snackPosition: SnackPosition.BOTTOM,
-    );
+    Get.snackbar('Error', message, snackPosition: SnackPosition.BOTTOM);
   }
 }

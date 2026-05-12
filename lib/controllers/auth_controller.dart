@@ -47,8 +47,8 @@ class AuthController extends GetxController {
   AuthController({
     required FirebaseService firebaseService,
     required SharedPreferences prefs,
-  })  : _firebaseService = firebaseService,
-        _prefs = prefs;
+  }) : _firebaseService = firebaseService,
+       _prefs = prefs;
 
   // ---------------------------------------------------------------------------
   // Lifecycle

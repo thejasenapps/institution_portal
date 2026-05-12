@@ -53,7 +53,6 @@ class SessionModel {
     );
   }
 
-
   /// Convert model to Firestore-compatible map
   Map<String, dynamic> toMap() {
     return {

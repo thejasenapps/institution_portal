@@ -20,10 +20,10 @@ class InitialBinding extends Bindings {
     );
 
     Get.lazyPut<FirebaseService>(
-          () => FirebaseService(
-            FirebaseFirestore.instance,
-            anonymousAuthService: Get.find<AnonymousAuthService>(),
-          ),
+      () => FirebaseService(
+        FirebaseFirestore.instance,
+        anonymousAuthService: Get.find<AnonymousAuthService>(),
+      ),
       fenix: true,
     );
 

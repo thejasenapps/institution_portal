@@ -39,7 +39,12 @@ abstract class ProfileErrors {
 /// Subscription history messages
 abstract class SubscriptionMessages {
   /// Displayed when subscription history is empty (Requirement 7.6)
-  static const String noSubscriptionHistory = 'No previous subscriptions found.';
+  static const String noSubscriptionHistory =
+      'No previous subscription history.';
+
+  /// Supporting line beneath [noSubscriptionHistory] (empty-state designs).
+  static const String noSubscriptionHistoryHint =
+      'Your account records will appear here.';
 
   /// Placeholder for missing subscription expiry (Requirement 3.3)
   static const String noExpiryDate = '—';

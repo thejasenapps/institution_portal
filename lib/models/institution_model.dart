@@ -158,13 +158,10 @@ class InstitutionModel {
       name: (data['name'] as String?) ?? '',
       logo: data['logo'],
       email: data['email'],
-      subscriptionStatus:
-      (data['subscriptionStatus'] as bool?) ?? false,
+      subscriptionStatus: (data['subscriptionStatus'] as bool?) ?? false,
       domainUrl: (data['domainUrl'] as String?) ?? '',
-      subscriptionStartDate:
-      _parseNullableDate(data['subscriptionStartDate']),
-      subscriptionEndDate:
-      _parseNullableDate(data['subscriptionEndDate']),
+      subscriptionStartDate: _parseNullableDate(data['subscriptionStartDate']),
+      subscriptionEndDate: _parseNullableDate(data['subscriptionEndDate']),
       subscriptionAmount: data['subscriptionAmount'] as int?,
       subscriptionHistory: history,
       trialLimit: data['trialLimit'] as int?,
@@ -184,25 +181,21 @@ class InstitutionModel {
       'domainUrl': domainUrl,
 
       if (subscriptionStartDate != null)
-        'subscriptionStartDate':
-        Timestamp.fromDate(subscriptionStartDate!),
+        'subscriptionStartDate': Timestamp.fromDate(subscriptionStartDate!),
 
       if (subscriptionEndDate != null)
-        'subscriptionEndDate':
-        Timestamp.fromDate(subscriptionEndDate!),
+        'subscriptionEndDate': Timestamp.fromDate(subscriptionEndDate!),
 
-      if (subscriptionAmount != null)
-        'subscriptionAmount': subscriptionAmount,
+      if (subscriptionAmount != null) 'subscriptionAmount': subscriptionAmount,
 
       if (subscriptionHistory != null)
-        'subscriptionHistory':
-        subscriptionHistory!.map((e) => e.toMap()).toList(),
+        'subscriptionHistory': subscriptionHistory!
+            .map((e) => e.toMap())
+            .toList(),
 
-      if (trialLimit != null)
-        'trialLimit': trialLimit,
+      if (trialLimit != null) 'trialLimit': trialLimit,
 
-      if (origin != null)
-        'origin': origin,
+      if (origin != null) 'origin': origin,
 
       if (registeredAt != null)
         'registeredAt': Timestamp.fromDate(registeredAt!),
@@ -217,7 +210,7 @@ class InstitutionModel {
       logo: '',
       subscriptionStatus: false,
       domainUrl: '',
-      email: ''
+      email: '',
     );
   }
 

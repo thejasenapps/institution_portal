@@ -39,10 +39,8 @@ class FirebaseService {
 
   /// Creates a [FirebaseService] backed by the given [FirebaseFirestore]
   /// instance.
-  FirebaseService(
-    this._firestore, {
-    AnonymousAuthService? anonymousAuthService,
-  }) : _anonymousAuthService = anonymousAuthService;
+  FirebaseService(this._firestore, {AnonymousAuthService? anonymousAuthService})
+    : _anonymousAuthService = anonymousAuthService;
 
   Future<void> _ensureAuthenticatedWrite() async {
     if (_anonymousAuthService == null) return;
@@ -104,10 +102,7 @@ class FirebaseService {
       if (snapshot.docs.isEmpty) return null;
       return InstitutionModel.fromFirestore(snapshot.docs.first);
     } catch (e) {
-      throw FirebaseServiceException(
-        'Failed to get institution.',
-        cause: e,
-      );
+      throw FirebaseServiceException('Failed to get institution.', cause: e);
     }
   }
 
@@ -117,8 +112,7 @@ class FirebaseService {
   /// Returns an empty list when no matching documents are found.
   ///
   /// Throws [FirebaseServiceException] on any Firestore or timeout error.
-  Future<List<TopicModel>> getTopicsForInstitution(
-      String institutionId) async {
+  Future<List<TopicModel>> getTopicsForInstitution(String institutionId) async {
     try {
       final snapshot = await _firestore
           .collection('topics')
@@ -126,9 +120,7 @@ class FirebaseService {
           .get()
           .timeout(_timeout);
 
-      return snapshot.docs
-          .map((doc) => TopicModel.fromFirestore(doc))
-          .toList();
+      return snapshot.docs.map((doc) => TopicModel.fromFirestore(doc)).toList();
     } catch (e) {
       throw FirebaseServiceException(
         'Failed to get topics for institution.',
@@ -153,10 +145,7 @@ class FirebaseService {
       if (!doc.exists) return null;
       return ExpertModel.fromFirestore(doc.data() as Map<String, dynamic>);
     } catch (e) {
-      throw FirebaseServiceException(
-        'Failed to get expert.',
-        cause: e,
-      );
+      throw FirebaseServiceException('Failed to get expert.', cause: e);
     }
   }
 
@@ -176,10 +165,7 @@ class FirebaseService {
       if (!doc.exists) return null;
       return SessionModel.fromFirestore(doc);
     } catch (e) {
-      throw FirebaseServiceException(
-        'Failed to get session.',
-        cause: e,
-      );
+      throw FirebaseServiceException('Failed to get session.', cause: e);
     }
   }
 
@@ -192,8 +178,7 @@ class FirebaseService {
   ///
   /// Throws [FirebaseServiceException] when the institution document cannot be
   /// found or when the Firestore update fails.
-  Future<void> updateInstitutionName(
-      String institutionId, String name) async {
+  Future<void> updateInstitutionName(String institutionId, String name) async {
     try {
       await _ensureAuthenticatedWrite();
 
@@ -211,7 +196,8 @@ class FirebaseService {
       }
 
       await snapshot.docs.first.reference
-          .update({'name': name}).timeout(_timeout);
+          .update({'name': name})
+          .timeout(_timeout);
     } on FirebaseServiceException {
       rethrow;
     } catch (e) {
@@ -228,7 +214,9 @@ class FirebaseService {
   /// Throws [FirebaseServiceException] when the institution document cannot be
   /// found or when the Firestore update fails.
   Future<void> updateInstitutionLogoUrl(
-      String institutionId, String logoUrl) async {
+    String institutionId,
+    String logoUrl,
+  ) async {
     try {
       await _ensureAuthenticatedWrite();
 
@@ -246,7 +234,8 @@ class FirebaseService {
       }
 
       await snapshot.docs.first.reference
-          .update({'logo': logoUrl, 'logoUrl': logoUrl}).timeout(_timeout);
+          .update({'logo': logoUrl, 'logoUrl': logoUrl})
+          .timeout(_timeout);
     } on FirebaseServiceException {
       rethrow;
     } catch (e) {

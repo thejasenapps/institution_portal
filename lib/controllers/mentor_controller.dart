@@ -43,7 +43,7 @@ class MentorController extends GetxController {
   // ---------------------------------------------------------------------------
 
   MentorController({required FirebaseService firebaseService})
-      : _firebaseService = firebaseService;
+    : _firebaseService = firebaseService;
 
   // ---------------------------------------------------------------------------
   // Public API
@@ -95,14 +95,14 @@ class MentorController extends GetxController {
     // Process all topics in parallel using Future.wait.
     final futures = topics.map((topic) => _buildMentorRow(topic));
     final results = await Future.wait(
-      futures.map((f) => f.then<MentorRowModel?>((row) => row).catchError(
-            (Object e) {
-              hadPartialFailure = true;
-              // ignore: avoid_print
-              print('MentorController: failed to build row for topic: $e');
-              return null;
-            },
-          )),
+      futures.map(
+        (f) => f.then<MentorRowModel?>((row) => row).catchError((Object e) {
+          hadPartialFailure = true;
+          // ignore: avoid_print
+          print('MentorController: failed to build row for topic: $e');
+          return null;
+        }),
+      ),
     );
 
     for (final row in results) {
@@ -146,8 +146,9 @@ class MentorController extends GetxController {
 
     // Run expert and session reads in parallel.
     final expertFuture = _firebaseService.getExpert(topic.expertId ?? '');
-    final sessionFuture =
-        hasSession ? _firebaseService.getSession(topic.sessionId) : null;
+    final sessionFuture = hasSession
+        ? _firebaseService.getSession(topic.sessionId)
+        : null;
 
     ExpertModel? expert;
     SessionModel? session;
@@ -156,14 +157,13 @@ class MentorController extends GetxController {
       // Parallel fetch — expert failure propagates, session failure is caught.
       final results = await Future.wait([
         expertFuture,
-        sessionFuture.then<SessionModel?>((s) => s).catchError(
-          (Object e) {
-            // ignore: avoid_print
-            print(
-                'MentorController: session read failed for sessionId=${topic.sessionId}: $e');
-            return null;
-          },
-        ),
+        sessionFuture.then<SessionModel?>((s) => s).catchError((Object e) {
+          // ignore: avoid_print
+          print(
+            'MentorController: session read failed for sessionId=${topic.sessionId}: $e',
+          );
+          return null;
+        }),
       ]);
       expert = results[0] as ExpertModel?;
       session = results[1] as SessionModel?;

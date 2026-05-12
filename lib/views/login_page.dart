@@ -67,10 +67,7 @@ class _LoginPageState extends State<LoginPage> {
 
     // Delegate to AuthController regardless — it performs its own validation
     // and sets errorMessage reactively.
-    _controller.login(
-      _emailController.text,
-      _institutionIdController.text,
-    );
+    _controller.login(_emailController.text, _institutionIdController.text);
   }
 
   // ---------------------------------------------------------------------------
@@ -82,16 +79,24 @@ class _LoginPageState extends State<LoginPage> {
     final theme = Theme.of(context);
 
     return Scaffold(
+      backgroundColor: theme.colorScheme.surfaceContainerLowest,
       body: Center(
         child: SingleChildScrollView(
           padding: const EdgeInsets.all(24),
           child: ConstrainedBox(
             constraints: const BoxConstraints(maxWidth: 480),
             child: Card(
-              elevation: 4,
+              elevation: 1,
               shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(12),
+                borderRadius: BorderRadius.circular(8),
+                side: BorderSide(
+                  color: theme.colorScheme.outlineVariant.withValues(
+                    alpha: 0.65,
+                  ),
+                  width: 1,
+                ),
               ),
+              shadowColor: theme.shadowColor.withValues(alpha: 0.08),
               child: Padding(
                 padding: const EdgeInsets.all(32),
                 child: Form(
@@ -104,7 +109,7 @@ class _LoginPageState extends State<LoginPage> {
                       // Title
                       // -------------------------------------------------------
                       Text(
-                        'Institution Portal',
+                        'Institutional Portal',
                         style: theme.textTheme.headlineSmall?.copyWith(
                           fontWeight: FontWeight.bold,
                         ),
@@ -133,15 +138,16 @@ class _LoginPageState extends State<LoginPage> {
                         autocorrect: false,
                         decoration: const InputDecoration(
                           labelText: 'Email',
-                          hintText: 'you@institution.edu',
-                          prefixIcon: Icon(Icons.email_outlined),
+                          hintText: 'Email',
+                          prefixIcon: Icon(Icons.email_outlined, size: 20),
                           border: OutlineInputBorder(),
                           counterText: '', // hide the built-in counter
                         ),
                         onFieldSubmitted: (_) {
                           // Move focus to Institution ID field on Enter
-                          FocusScope.of(context)
-                              .requestFocus(_institutionIdFocus);
+                          FocusScope.of(
+                            context,
+                          ).requestFocus(_institutionIdFocus);
                         },
                         // Validator is intentionally lenient here — the
                         // AuthController performs the authoritative check and
@@ -167,8 +173,8 @@ class _LoginPageState extends State<LoginPage> {
                         textInputAction: TextInputAction.done,
                         decoration: const InputDecoration(
                           labelText: 'Institution ID',
-                          hintText: 'Enter your Institution ID',
-                          prefixIcon: Icon(Icons.lock_outline),
+                          hintText: 'Institution ID',
+                          prefixIcon: Icon(Icons.lock_outline, size: 20),
                           border: OutlineInputBorder(),
                           counterText: '', // hide the built-in counter
                         ),
@@ -193,7 +199,7 @@ class _LoginPageState extends State<LoginPage> {
                           style: ElevatedButton.styleFrom(
                             minimumSize: const Size.fromHeight(48),
                             shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(8),
+                              borderRadius: BorderRadius.circular(10),
                             ),
                           ),
                           child: loading

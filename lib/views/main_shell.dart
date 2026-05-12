@@ -37,7 +37,7 @@ const List<_NavItem> _navItems = [
 const _NavItem _logoutItem = _NavItem(
   index: -1,
   icon: Icons.logout,
-  label: 'Logout',
+  label: 'Sign Out',
 );
 
 // ---------------------------------------------------------------------------
@@ -67,6 +67,7 @@ class MainShell extends StatelessWidget {
             width >= Breakpoints.mobile && width < Breakpoints.tablet;
 
         return Scaffold(
+          backgroundColor: Theme.of(context).colorScheme.surfaceContainerLowest,
           // ── Mobile: hamburger AppBar ──────────────────────────────────────
           appBar: isMobile
               ? AppBar(
@@ -106,15 +107,15 @@ class MainShell extends StatelessWidget {
           body: Row(
             children: [
               if (!isMobile)
-                Obx(() => Sidebar(
-                  collapsed: isTablet,
-                  activeIndex: nav.activeIndex.value,
-                  onItemTap: nav.navigateTo,
-                  onLogoutTap: Get.find<AuthController>().logout,
-                )),
-              Expanded(
-                child: Obx(() => _contentView(nav.activeIndex.value)),
-              ),
+                Obx(
+                  () => Sidebar(
+                    collapsed: isTablet,
+                    activeIndex: nav.activeIndex.value,
+                    onItemTap: nav.navigateTo,
+                    onLogoutTap: Get.find<AuthController>().logout,
+                  ),
+                ),
+              Expanded(child: Obx(() => _contentView(nav.activeIndex.value))),
             ],
           ),
         );
@@ -134,7 +135,7 @@ class MainShell extends StatelessWidget {
       case 3:
         return 'Settings';
       default:
-        return 'Institution Portal';
+        return 'Institutional Portal';
     }
   }
 
@@ -199,12 +200,15 @@ class Sidebar extends StatelessWidget {
       duration: const Duration(milliseconds: 200),
       width: width,
       decoration: BoxDecoration(
-        color: colorScheme.surface,
+        color:
+            Color.lerp(
+              colorScheme.surface,
+              colorScheme.surfaceContainerLowest,
+              0.85,
+            ) ??
+            colorScheme.surface,
         border: Border(
-          right: BorderSide(
-            color: colorScheme.outlineVariant,
-            width: 1,
-          ),
+          right: BorderSide(color: colorScheme.outlineVariant, width: 1),
         ),
       ),
       child: Column(
@@ -212,22 +216,45 @@ class Sidebar extends StatelessWidget {
         children: [
           // ── Logo / brand area ─────────────────────────────────────────────
           SizedBox(
-            height: 64,
-            child: Center(
-              child: collapsed
-                  ? Icon(Icons.school, color: colorScheme.primary, size: 28)
-                  : Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 16),
-                      child: Text(
-                        'Institution Portal',
-                        style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                              color: colorScheme.primary,
-                              fontWeight: FontWeight.bold,
-                            ),
-                        overflow: TextOverflow.ellipsis,
+            height: 72,
+            child: collapsed
+                ? Center(
+                    child: Tooltip(
+                      message: 'Institutional Portal — Admin Console',
+                      child: Icon(
+                        Icons.business_rounded,
+                        color: colorScheme.primary,
+                        size: 28,
                       ),
                     ),
-            ),
+                  )
+                : Padding(
+                    padding: const EdgeInsets.fromLTRB(16, 16, 12, 8),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'Institutional Portal',
+                          style: Theme.of(context).textTheme.titleMedium
+                              ?.copyWith(
+                                color: colorScheme.primary,
+                                fontWeight: FontWeight.w700,
+                              ),
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                        const SizedBox(height: 4),
+                        Text(
+                          'Admin Console',
+                          style: Theme.of(context).textTheme.labelMedium
+                              ?.copyWith(
+                                color: colorScheme.onSurfaceVariant,
+                                fontWeight: FontWeight.w500,
+                              ),
+                        ),
+                      ],
+                    ),
+                  ),
           ),
 
           const Divider(height: 1),
@@ -291,9 +318,9 @@ class _SidebarItem extends StatelessWidget {
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
 
-    final activeColor = colorScheme.primary;
     final inactiveColor = colorScheme.onSurfaceVariant;
-    final iconColor = isActive ? activeColor : inactiveColor;
+    final activeForeground = colorScheme.onPrimary;
+    final iconColor = isActive ? activeForeground : inactiveColor;
 
     Widget itemContent;
 
@@ -308,11 +335,11 @@ class _SidebarItem extends StatelessWidget {
           alignment: Alignment.center,
           decoration: isActive
               ? BoxDecoration(
-                  color: colorScheme.primaryContainer,
+                  color: colorScheme.primary,
                   borderRadius: BorderRadius.circular(12),
                 )
               : null,
-          child: Icon(icon, color: iconColor, size: 24),
+          child: Icon(icon, color: iconColor, size: 22),
         ),
       );
     } else {
@@ -320,25 +347,24 @@ class _SidebarItem extends StatelessWidget {
       itemContent = Container(
         width: double.infinity,
         height: 48,
-        padding: const EdgeInsets.symmetric(horizontal: 16),
+        padding: const EdgeInsets.symmetric(horizontal: 14),
         decoration: isActive
             ? BoxDecoration(
-                color: colorScheme.primaryContainer,
+                color: colorScheme.primary,
                 borderRadius: BorderRadius.circular(12),
               )
             : null,
         child: Row(
           children: [
-            Icon(icon, color: iconColor, size: 24),
-            const SizedBox(width: 12),
+            Icon(icon, color: iconColor, size: 22),
+            const SizedBox(width: 10),
             Expanded(
               child: Text(
                 label,
                 style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                      color: iconColor,
-                      fontWeight:
-                          isActive ? FontWeight.w600 : FontWeight.normal,
-                    ),
+                  color: iconColor,
+                  fontWeight: isActive ? FontWeight.w600 : FontWeight.w500,
+                ),
                 overflow: TextOverflow.ellipsis,
               ),
             ),
@@ -396,14 +422,25 @@ class _DrawerContent extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             mainAxisAlignment: MainAxisAlignment.end,
             children: [
-              Icon(Icons.school, color: colorScheme.primary, size: 36),
+              Icon(
+                Icons.business_rounded,
+                color: colorScheme.primary,
+                size: 36,
+              ),
               const SizedBox(height: 8),
               Text(
-                'Institution Portal',
+                'Institutional Portal',
                 style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                      color: colorScheme.onPrimaryContainer,
-                      fontWeight: FontWeight.bold,
-                    ),
+                  color: colorScheme.onPrimaryContainer,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              const SizedBox(height: 4),
+              Text(
+                'Admin Console',
+                style: Theme.of(context).textTheme.labelMedium?.copyWith(
+                  color: colorScheme.onSurfaceVariant,
+                ),
               ),
             ],
           ),

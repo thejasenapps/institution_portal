@@ -74,9 +74,10 @@ class TopicModel {
       sessionId: (data['sessionId'] as String?) ?? '',
       session: (data['session'] as String?) ?? '',
       sessionType: (data['sessionType'] as String?) ?? '',
-      expertise: (data['expertise'] as List<dynamic>?)
-          ?.map((e) => e.toString())
-          .toList() ??
+      expertise:
+          (data['expertise'] as List<dynamic>?)
+              ?.map((e) => e.toString())
+              .toList() ??
           [],
       rating: (data['rating'] as num?)?.toDouble(),
       location: data['location'] as String?,
@@ -86,14 +87,16 @@ class TopicModel {
       imageUrl: data['imageUrl'] as String?,
       audio: data['audio'],
       audioId: data['audioId'] as String?,
-      languages: (data['languages'] as List<dynamic>?)
-          ?.map((e) => e.toString())
-          .toList() ??
+      languages:
+          (data['languages'] as List<dynamic>?)
+              ?.map((e) => e.toString())
+              .toList() ??
           [],
       currencySymbol: data['currencySymbol'] as String? ?? '₹',
-      momentsIds: (data['momentsIds'] as List<dynamic>?)
-          ?.map((e) => e.toString())
-          .toList() ??
+      momentsIds:
+          (data['momentsIds'] as List<dynamic>?)
+              ?.map((e) => e.toString())
+              .toList() ??
           [],
       availability: (data['availability'] as bool?) ?? false,
       keywordId: data['keywordId'] as String?,
@@ -134,8 +137,7 @@ class TopicModel {
       'keywordId': keywordId,
       'meetingUrl': meetingUrl,
       'badgeId': badgeId,
-      'timestamp':
-      timestamp != null ? Timestamp.fromDate(timestamp!) : null,
+      'timestamp': timestamp != null ? Timestamp.fromDate(timestamp!) : null,
       'institutionId': institutionId,
     };
   }

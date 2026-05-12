@@ -69,7 +69,8 @@ class _DashboardViewState extends State<DashboardView> {
   /// Checks controller error states and updates the banner accordingly.
   void _evaluateBanner() {
     final mentorFailed = _mentorController.hasError.value;
-    final profileFailed = _profileController.institution.value == null &&
+    final profileFailed =
+        _profileController.institution.value == null &&
         !_mentorController.isLoading.value;
 
     if (mentorFailed || profileFailed) {
@@ -77,8 +78,7 @@ class _DashboardViewState extends State<DashboardView> {
       if (mentorFailed) parts.add('mentor data');
       if (profileFailed) parts.add('institution data');
       setState(() {
-        _bannerMessage =
-            'Failed to load ${parts.join(' and ')}. Please retry.';
+        _bannerMessage = 'Failed to load ${parts.join(' and ')}. Please retry.';
         _showBanner = true;
       });
     } else {
@@ -105,6 +105,7 @@ class _DashboardViewState extends State<DashboardView> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Colors.transparent,
       body: Column(
         children: [
           // Material Banner shown on fetch error.
@@ -113,10 +114,7 @@ class _DashboardViewState extends State<DashboardView> {
               content: Text(_bannerMessage),
               leading: const Icon(Icons.error_outline),
               actions: [
-                TextButton(
-                  onPressed: _onReload,
-                  child: const Text('Retry'),
-                ),
+                TextButton(onPressed: _onReload, child: const Text('Retry')),
                 TextButton(
                   onPressed: () => setState(() => _showBanner = false),
                   child: const Text('Dismiss'),
@@ -136,7 +134,8 @@ class _DashboardViewState extends State<DashboardView> {
                     children: [
                       Text(
                         'Dashboard',
-                        style: Theme.of(context).textTheme.headlineSmall,
+                        style: Theme.of(context).textTheme.headlineSmall
+                            ?.copyWith(fontWeight: FontWeight.w700),
                       ),
                       Semantics(
                         label: AccessibilityLabels.reloadMentorData,
@@ -153,14 +152,8 @@ class _DashboardViewState extends State<DashboardView> {
                   LayoutBuilder(
                     builder: (context, constraints) {
                       final width = constraints.maxWidth;
-                      final int columns;
-                      if (width >= Breakpoints.desktop) {
-                        columns = 3; // ≥ 1280 px → 3+ columns
-                      } else if (width >= Breakpoints.tablet) {
-                        columns = 2; // 1024–1279 px → 2 columns
-                      } else {
-                        columns = 1; // < 1024 px → 1 column
-                      }
+                      // Match dashboard mocks: never show more columns than metrics.
+                      final int columns = width >= Breakpoints.tablet ? 2 : 1;
 
                       return _StatCardGrid(
                         columns: columns,
@@ -222,10 +215,12 @@ class _StatCardGrid extends StatelessWidget {
         // Single-column: stack cards vertically.
         return Column(
           children: cards
-              .map((card) => Padding(
-                    padding: const EdgeInsets.only(bottom: 16.0),
-                    child: card,
-                  ))
+              .map(
+                (card) => Padding(
+                  padding: const EdgeInsets.only(bottom: 16.0),
+                  child: card,
+                ),
+              )
               .toList(),
         );
       }
@@ -234,17 +229,13 @@ class _StatCardGrid extends StatelessWidget {
       return LayoutBuilder(
         builder: (context, constraints) {
           final totalWidth = constraints.maxWidth;
-          final cardWidth =
-              (totalWidth - (columns - 1) * 16.0) / columns;
+          final cardWidth = (totalWidth - (columns - 1) * 16.0) / columns;
 
           return Wrap(
             spacing: 16.0,
             runSpacing: 16.0,
             children: cards.map((card) {
-              return SizedBox(
-                width: cardWidth,
-                child: card,
-              );
+              return SizedBox(width: cardWidth, child: card);
             }).toList(),
           );
         },

@@ -23,10 +23,7 @@ class ExpandableHistoryPanel extends StatelessWidget {
   /// The list of subscription history entries to display.
   final List<SubscriptionHistoryEntry> entries;
 
-  const ExpandableHistoryPanel({
-    super.key,
-    required this.entries,
-  });
+  const ExpandableHistoryPanel({super.key, required this.entries});
 
   @override
   Widget build(BuildContext context) {
@@ -40,15 +37,48 @@ class ExpandableHistoryPanel extends StatelessWidget {
       children: [
         if (sorted.isEmpty)
           Padding(
-            padding: const EdgeInsets.symmetric(
-              horizontal: 16.0,
-              vertical: 12.0,
-            ),
-            child: Text(
-              SubscriptionMessages.noSubscriptionHistory,
-              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                    color: Theme.of(context).colorScheme.onSurfaceVariant,
-                  ),
+            padding: const EdgeInsets.fromLTRB(16, 8, 16, 20),
+            child: DecoratedBox(
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(12.0),
+                border: Border.all(
+                  color: Theme.of(
+                    context,
+                  ).colorScheme.outlineVariant.withValues(alpha: 0.75),
+                  style: BorderStyle.solid,
+                ),
+              ),
+              child: Padding(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 20.0,
+                  vertical: 28.0,
+                ),
+                child: Column(
+                  children: [
+                    Icon(
+                      Icons.history,
+                      size: 44,
+                      color: Theme.of(context).colorScheme.onSurfaceVariant,
+                    ),
+                    const SizedBox(height: 12),
+                    Text(
+                      SubscriptionMessages.noSubscriptionHistory,
+                      textAlign: TextAlign.center,
+                      style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                    const SizedBox(height: 6),
+                    Text(
+                      SubscriptionMessages.noSubscriptionHistoryHint,
+                      textAlign: TextAlign.center,
+                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                        color: Theme.of(context).colorScheme.onSurfaceVariant,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
             ),
           )
         else
@@ -105,9 +135,7 @@ class _StatusChip extends StatelessWidget {
           fontWeight: FontWeight.w500,
         ),
       ),
-      backgroundColor: isActive
-          ? Colors.green.shade600
-          : Colors.grey.shade400,
+      backgroundColor: isActive ? Colors.green.shade600 : Colors.grey.shade400,
       padding: const EdgeInsets.symmetric(horizontal: 4.0),
       materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
       visualDensity: VisualDensity.compact,

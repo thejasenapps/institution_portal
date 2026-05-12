@@ -19,36 +19,21 @@ import 'auth_middleware.dart';
 /// Defines all application pages (routes) for GetX named routing.
 class AppPages {
   static final pages = [
-    GetPage(
-      name: AppRoutes.login,
-      page: () => const LoginPage(),
-    ),
+    GetPage(name: AppRoutes.login, page: () => const LoginPage()),
     GetPage(
       name: AppRoutes.shell,
       page: () => const MainShell(),
       binding: MainBinding(),
       middlewares: [AuthMiddleware()],
       children: [
-        GetPage(
-          name: '/dashboard',
-          page: () => const DashboardView(),
-        ),
-        GetPage(
-          name: '/mentors',
-          page: () => const MentorsView(),
-        ),
+        GetPage(name: '/dashboard', page: () => const DashboardView()),
+        GetPage(name: '/mentors', page: () => const MentorsView()),
         GetPage(
           name: '/mentors/detail/:expertId',
           page: () => const MentorDetailPanel(),
         ),
-        GetPage(
-          name: '/profile',
-          page: () => const ProfileView(),
-        ),
-        GetPage(
-          name: '/settings',
-          page: () => const SettingsView(),
-        ),
+        GetPage(name: '/profile', page: () => const ProfileView()),
+        GetPage(name: '/settings', page: () => const SettingsView()),
       ],
     ),
   ];

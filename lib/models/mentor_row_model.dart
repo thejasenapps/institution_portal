@@ -7,8 +7,8 @@ class MentorRowModel {
   final String topicId;
   final String institutionId;
   final String sessionId;
-  final String price;       // "Unknown" if session skipped/failed
-  final String duration;    // "Unknown" if session skipped/failed
+  final String price; // "Unknown" if session skipped/failed
+  final String duration; // "Unknown" if session skipped/failed
   final String sessionType; // "Unknown" if session skipped/failed
   // Optional — fetched lazily for DetailPanel
   final String? bio;

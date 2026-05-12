@@ -14,12 +14,12 @@ class MainBinding extends Bindings {
   void dependencies() {
     Get.lazyPut<NavigationController>(() => NavigationController());
     Get.lazyPut<MentorController>(
-          () => MentorController(firebaseService: Get.find()),
+      () => MentorController(firebaseService: Get.find()),
     );
     Get.lazyPut<ImageResizer>(() => ImageResizer());
     Get.lazyPut<FileUploader>(() => FileUploader(Dio()));
     Get.lazyPut<ProfileController>(
-          () => ProfileController(
+      () => ProfileController(
         firebaseService: Get.find(),
         fileUploader: Get.find(),
         imageResizer: Get.find(),

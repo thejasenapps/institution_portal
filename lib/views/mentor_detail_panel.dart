@@ -101,8 +101,7 @@ class _MentorDetailPanelState extends State<MentorDetailPanel> {
             duration: _mentor!.duration,
             sessionType: _mentor!.sessionType,
             bio: expert.name,
-            profileImageUrl:
-                expert.imageFile,
+            profileImageUrl: expert.imageFile,
           );
         });
       }
@@ -134,9 +133,7 @@ class _MentorDetailPanelState extends State<MentorDetailPanel> {
     return Scaffold(
       appBar: AppBar(
         title: Text(_mentor!.mentorName),
-        leading: BackButton(
-          onPressed: () => Get.back(),
-        ),
+        leading: BackButton(onPressed: () => Get.back()),
       ),
       body: _DetailContent(
         mentor: _mentor!,
@@ -174,10 +171,7 @@ class _InlinePanel extends StatelessWidget {
       decoration: BoxDecoration(
         color: colorScheme.surface,
         border: Border(
-          left: BorderSide(
-            color: colorScheme.outlineVariant,
-            width: 1.0,
-          ),
+          left: BorderSide(color: colorScheme.outlineVariant, width: 1.0),
         ),
         boxShadow: [
           BoxShadow(
@@ -192,14 +186,18 @@ class _InlinePanel extends StatelessWidget {
         children: [
           // Panel header with close button.
           Padding(
-            padding:
-                const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+            padding: const EdgeInsets.symmetric(
+              horizontal: 16.0,
+              vertical: 8.0,
+            ),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Text(
                   'Mentor Details',
-                  style: Theme.of(context).textTheme.titleMedium,
+                  style: Theme.of(
+                    context,
+                  ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w700),
                 ),
                 Semantics(
                   label: AccessibilityLabels.close,
@@ -234,13 +232,12 @@ class _DetailContent extends StatelessWidget {
   final MentorRowModel mentor;
   final bool isFetchingDetails;
 
-  const _DetailContent({
-    required this.mentor,
-    required this.isFetchingDetails,
-  });
+  const _DetailContent({required this.mentor, required this.isFetchingDetails});
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+
     return SingleChildScrollView(
       padding: const EdgeInsets.all(20.0),
       child: Column(
@@ -249,6 +246,7 @@ class _DetailContent extends StatelessWidget {
           // Profile image.
           Center(
             child: _ProfileImage(
+              nameForInitials: mentor.mentorName,
               imageUrl: mentor.profileImageUrl,
               isFetching: isFetchingDetails,
             ),
@@ -259,37 +257,217 @@ class _DetailContent extends StatelessWidget {
           Center(
             child: Text(
               mentor.mentorName,
-              style: Theme.of(context).textTheme.titleLarge,
+              style: Theme.of(
+                context,
+              ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w700),
               textAlign: TextAlign.center,
             ),
           ),
-          const SizedBox(height: 24.0),
+          const SizedBox(height: 22.0),
 
-          // Detail fields.
-          _DetailField(label: 'Expert ID', value: mentor.expertId),
-          _DetailField(
-            label: 'Bio',
-            value: isFetchingDetails
-                ? null // show loading placeholder
-                : (mentor.bio?.isNotEmpty == true
-                    ? mentor.bio!
-                    : ProfileErrors.missingBio),
-            isLoading: isFetchingDetails,
+          _DetailSectionCard(
+            icon: Icons.badge_outlined,
+            title: 'Identity',
+            accentColor: colorScheme.primary,
+            children: [
+              _DetailField(
+                label: 'Expert ID',
+                value: mentor.expertId,
+                boxed: true,
+              ),
+              _DetailField(
+                label: 'Institution ID',
+                value: mentor.institutionId,
+                boxed: true,
+              ),
+            ],
           ),
-          const Divider(height: 32.0),
-          _DetailField(label: 'Topic Name', value: mentor.topicName),
-          _DetailField(label: 'Topic ID', value: mentor.topicId),
-          _DetailField(label: 'Institution ID', value: mentor.institutionId),
-          const Divider(height: 32.0),
-          _DetailField(
-            label: 'Session ID',
-            value: mentor.sessionId.isNotEmpty
-                ? mentor.sessionId
-                : ProfileErrors.missingBio,
+          const SizedBox(height: 14.0),
+
+          _DetailSectionCard(
+            icon: Icons.school_outlined,
+            title: 'Topic',
+            accentColor: colorScheme.primary,
+            children: [
+              _DetailField(
+                label: 'Topic Name',
+                value: mentor.topicName,
+                boxed: true,
+              ),
+              _DetailField(
+                label: 'Topic ID',
+                value: mentor.topicId,
+                boxed: true,
+              ),
+              _DetailField(
+                label: 'Bio',
+                value: isFetchingDetails
+                    ? null
+                    : (mentor.bio?.isNotEmpty == true
+                          ? mentor.bio!
+                          : ProfileErrors.missingBio),
+                isLoading: isFetchingDetails,
+                boxed: true,
+              ),
+            ],
           ),
-          _DetailField(label: 'Price', value: mentor.price),
-          _DetailField(label: 'Duration', value: mentor.duration),
-          _DetailField(label: 'Session Type', value: mentor.sessionType),
+          const SizedBox(height: 14.0),
+
+          _DetailSectionCard(
+            icon: Icons.schedule_outlined,
+            title: 'Session configuration',
+            accentColor: colorScheme.primary,
+            children: [
+              Row(
+                children: [
+                  Expanded(
+                    child: _MiniHighlightTile(
+                      label: 'Price',
+                      valueText: mentor.price,
+                      emphasized: true,
+                    ),
+                  ),
+                  const SizedBox(width: 10),
+                  Expanded(
+                    child: _MiniHighlightTile(
+                      label: 'Session Type',
+                      valueText: mentor.sessionType,
+                      icon: Icons.person_outline,
+                      emphasized: false,
+                    ),
+                  ),
+                ],
+              ),
+              _DetailField(
+                label: 'Duration',
+                value: mentor.duration,
+                boxed: true,
+              ),
+              _DetailField(
+                label: 'Session ID',
+                value: mentor.sessionId.isNotEmpty
+                    ? mentor.sessionId
+                    : ProfileErrors.missingBio,
+                boxed: true,
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+// ---------------------------------------------------------------------------
+// _DetailSectionCard — bordered card grouping in mentor details
+// ---------------------------------------------------------------------------
+
+class _DetailSectionCard extends StatelessWidget {
+  final IconData icon;
+  final String title;
+  final Color accentColor;
+  final List<Widget> children;
+
+  const _DetailSectionCard({
+    required this.icon,
+    required this.title,
+    required this.accentColor,
+    required this.children,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Icon(icon, color: accentColor, size: 22),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: Text(
+                    title,
+                    style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                      fontWeight: FontWeight.w700,
+                      color: colorScheme.onSurface,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+            const Divider(height: 22),
+            ...children,
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+// ---------------------------------------------------------------------------
+// _MiniHighlightTile — compact stat tile used in session summary row
+// ---------------------------------------------------------------------------
+
+class _MiniHighlightTile extends StatelessWidget {
+  final String label;
+  final String valueText;
+  final bool emphasized;
+  final IconData? icon;
+
+  const _MiniHighlightTile({
+    required this.label,
+    required this.valueText,
+    required this.emphasized,
+    this.icon,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+    final valueStyle = emphasized
+        ? Theme.of(context).textTheme.titleMedium?.copyWith(
+            color: colorScheme.primary,
+            fontWeight: FontWeight.w800,
+          )
+        : Theme.of(
+            context,
+          ).textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w600);
+
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+      decoration: BoxDecoration(
+        color: colorScheme.surfaceContainerHighest.withValues(alpha: 0.45),
+        borderRadius: BorderRadius.circular(10),
+        border: Border.all(
+          color: colorScheme.outlineVariant.withValues(alpha: 0.55),
+        ),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            label,
+            style: Theme.of(context).textTheme.labelSmall?.copyWith(
+              color: colorScheme.onSurfaceVariant,
+            ),
+          ),
+          const SizedBox(height: 8),
+          icon != null
+              ? Row(
+                  children: [
+                    Icon(icon, size: 18, color: colorScheme.onSurfaceVariant),
+                    const SizedBox(width: 6),
+                    Expanded(
+                      child: Text(valueText, style: valueStyle, maxLines: 2),
+                    ),
+                  ],
+                )
+              : Text(valueText, style: valueStyle, maxLines: 2),
         ],
       ),
     );
@@ -301,15 +479,24 @@ class _DetailContent extends StatelessWidget {
 // ---------------------------------------------------------------------------
 
 class _ProfileImage extends StatelessWidget {
+  /// Used for initial-based fallback when no [imageUrl].
+  final String nameForInitials;
   final String? imageUrl;
   final bool isFetching;
 
   const _ProfileImage({
+    required this.nameForInitials,
     required this.imageUrl,
     required this.isFetching,
   });
 
   static const double _size = 96.0;
+
+  String _initial() {
+    final t = nameForInitials.trim();
+    if (t.isEmpty) return '?';
+    return t[0].toUpperCase();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -319,20 +506,24 @@ class _ProfileImage extends StatelessWidget {
       // Show placeholder avatar while fetching or when no URL is available.
       return CircleAvatar(
         radius: _size / 2,
-        backgroundColor: colorScheme.primaryContainer,
+        backgroundColor: colorScheme.surface,
+        foregroundColor: colorScheme.primary,
         child: isFetching
             ? SizedBox(
                 width: 32.0,
                 height: 32.0,
                 child: CircularProgressIndicator(
                   strokeWidth: 2.0,
-                  color: colorScheme.onPrimaryContainer,
+                  color: colorScheme.primary,
                 ),
               )
-            : Icon(
-                Icons.person,
-                size: _size / 2,
-                color: colorScheme.onPrimaryContainer,
+            : Text(
+                _initial(),
+                style: TextStyle(
+                  fontSize: _size / 3,
+                  fontWeight: FontWeight.w800,
+                  color: colorScheme.primary,
+                ),
               ),
       );
     }
@@ -346,24 +537,27 @@ class _ProfileImage extends StatelessWidget {
         // Placeholder shown while the image loads.
         placeholder: (context, url) => CircleAvatar(
           radius: _size / 2,
-          backgroundColor: colorScheme.primaryContainer,
+          backgroundColor: colorScheme.surface,
           child: SizedBox(
             width: 32.0,
             height: 32.0,
             child: CircularProgressIndicator(
               strokeWidth: 2.0,
-              color: colorScheme.onPrimaryContainer,
+              color: colorScheme.primary,
             ),
           ),
         ),
         // Fallback avatar shown when the image fails to load.
         errorWidget: (context, url, error) => CircleAvatar(
           radius: _size / 2,
-          backgroundColor: colorScheme.primaryContainer,
-          child: Icon(
-            Icons.person,
-            size: _size / 2,
-            color: colorScheme.onPrimaryContainer,
+          backgroundColor: colorScheme.surface,
+          child: Text(
+            _initial(),
+            style: TextStyle(
+              fontSize: _size / 3,
+              fontWeight: FontWeight.w800,
+              color: colorScheme.primary,
+            ),
           ),
         ),
       ),
@@ -379,11 +573,13 @@ class _DetailField extends StatelessWidget {
   final String label;
   final String? value;
   final bool isLoading;
+  final bool boxed;
 
   const _DetailField({
     required this.label,
     this.value,
     this.isLoading = false,
+    this.boxed = false,
   });
 
   @override
@@ -403,13 +599,32 @@ class _DetailField extends StatelessWidget {
               letterSpacing: 0.5,
             ),
           ),
-          const SizedBox(height: 2.0),
+          const SizedBox(height: 6.0),
           isLoading
               ? SizedBox(
                   height: 16.0,
                   width: 120.0,
                   child: LinearProgressIndicator(
                     borderRadius: BorderRadius.circular(4.0),
+                  ),
+                )
+              : boxed
+              ? Container(
+                  width: double.infinity,
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 12,
+                    vertical: 11,
+                  ),
+                  decoration: BoxDecoration(
+                    color: colorScheme.surfaceContainerHighest,
+                    borderRadius: BorderRadius.circular(8),
+                    border: Border.all(
+                      color: colorScheme.outlineVariant.withValues(alpha: 0.65),
+                    ),
+                  ),
+                  child: Text(
+                    value ?? ProfileErrors.missingBio,
+                    style: textTheme.bodyMedium,
                   ),
                 )
               : Text(
